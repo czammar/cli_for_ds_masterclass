@@ -7,12 +7,19 @@ import itertools
 from sklearn.linear_model import LogisticRegression
 from sklearn.multiclass import OneVsRestClassifier
 import pickle
+from config import bot_config
+from os import path
 
 
 class TrainBot:
 
-    def __init__(self, conversations_path: str):
-        self.conversations_path = conversations_path
+    def __init__(self, conversations_path: str, config=bot_config):
+        self.config = config
+        self.conversations_path = path.join(
+           self.config.BOT_DATA_PATH,
+           "conversations.json"
+        )
+
         self.nlp = spacy.load('es_core_news_sm')
 
         # Obtain conversation data
@@ -88,7 +95,7 @@ class TrainBot:
 
         # Get Bag of Words for questions
         bow = pd.DataFrame(
-            X.toarray(),
+            X.toarray(),  # type: ignore
             columns=self.vectorizer.get_feature_names_out()
             )
 
@@ -105,7 +112,7 @@ class TrainBot:
         ).reset_index(drop=True)
 
         # Bolsa de palabras como arreglo de numpy
-        x_train = processed_data._get_numeric_data().to_numpy()
+        x_train = processed_data._get_numeric_data().to_numpy()  # type: ignore
 
         # Crea version numerica de etiquetas
         self.le = LabelEncoder()
@@ -133,14 +140,32 @@ class TrainBot:
         """
         Saving model, vectorizer and label encoding
         """
-        pickle.dump(self.model, open("model.pk","wb"))
-        print("Model saved to model.pk")
+        save_items = {
+            "model.pk": self.model,
+            "vectorizer.pk": self.vectorizer,
+            "label_encoder.pk": self.le,
+            "tags_answers.pk": self.tags_answers,
+        }
 
-        pickle.dump(self.vectorizer, open("vectorizer.pk","wb"))
-        print("Vectorizer saved to vectorizer.pk")
+        for filename, obj in save_items.items():
+            file_path = os.path.join(self.config.BOT_DATA_PATH, filename)
+            try:
+                with open(file_path, "wb") as f:
+                    pickle.dump(obj, f)
+                print(f"Saved {filename} to {file_path}")
+            except Exception as e:
+                print(f"Failed to save {filename}: {e}")
 
-        pickle.dump(self.le, open("label_enconder.pk", "wb"))
-        print("Label Encoder to label_enconder.pk")
 
-        pickle.dump(self.tags_answers, open("tags_answers.pk", "wb"))
-        print("Tags-Answers dictionary saved to tags_answers.pk")
+if __name__ == "__main__":
+    import os
+    print(os.getcwd())
+    bot = TrainBot(
+        conversations_path="./src/bot/data/conversations.json"
+        )
+
+    # traning the conversational model
+    bot.fit()
+
+    # Save relevant objets
+    bot.save_objects()
