@@ -1,0 +1,36 @@
+[project]
+name = "cli-for-ds-masterclass"
+version = "0.1.0"
+description = "A short talk on cli for ds"
+authors = [
+    {name = "cesar.zamora.martinez",email = "cesar.zamora.martinez@bbva.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "pydantic-settings (>=2.10.1,<3.0.0)",
+    "faker (>=37.4.0,<38.0.0)",
+    "requests (>=2.32.4,<3.0.0)",
+    "beautifulsoup4 (>=4.13.4,<5.0.0)",
+    "jupyterlab (>=4.4.4,<5.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.bot.dependencies]
+scikit-learn = "^1.7.0"
+pandas = "^2.3.0"
+spacy = "^3.8.7"
+fastapi = {extras = ["standard"], version = "^0.115.14"}
+pydantic = "^2.11.7"
+
+
+[tool.poetry.group.test.dependencies]
+flake8 = "^7.3.0"
+mypy = "^1.16.1"
+isort = "^6.0.1"
+black = "^25.1.0"
+
